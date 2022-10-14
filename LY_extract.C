@@ -1,4 +1,5 @@
 #include <iostream>
+#include "FairLogger.h"
 #include <vector>
 #include <algorithm>
 #include <regex>
@@ -50,6 +51,8 @@ void FilterFileList(std::vector<std::string> &dirlist, std::string regex)
 void LY_extract(std::string path_and_prefix)
 {
   // SETUP
+  FairLogger::GetLogger()->SetLogScreenLevel("detail");
+
   // gather files from regex
   std::string pwd = getenv("PWD");
   std::string inpath = dirname(path_and_prefix);
@@ -91,12 +94,12 @@ void LY_extract(std::string path_and_prefix)
     }
 
     /// do for all files
-    TH1F *histoX_hit, *histoMode;
+    TH1F *histoX_hit, *histoR_LY;
     TFitResult *res;
     datareader->GetObject("X_hit;1", histoX_hit);
-    datareader->GetObject(TString(mode + ";1"), histoMode);
+    datareader->GetObject("R_LY;1", histoR_LY);
     double x, ex = 0;
-    datareader->GetObject(TString("TFitResult-" + mode + "-gaus;1"), res);
+    datareader->GetObject(TString("TFitResult-R_LY-gaus;1"), res);
     double y, ey = 0;
     if (histoX_hit == nullptr)
     {
@@ -112,7 +115,7 @@ void LY_extract(std::string path_and_prefix)
     }
     if (res == nullptr)
     {
-      LOG(warn) << "Object not found: \"TFitResult-" + mode + "-gaus;1\"";
+      LOG(warn) << "Object not found: \"TFitResult-R_LY-gaus;1\"";
       y = 0;
       ey = 0;
       continue;
@@ -126,7 +129,7 @@ void LY_extract(std::string path_and_prefix)
     LOG(detail) << "eX:" << ex << "\teY:" << ey;
     points.push_back(std::make_tuple(x, y, ex, ey)); // store points to graph
     datawriter->cd("histos");
-    histoMode->Write(TString::Format("X_%.1f", x)); // store histograms
+    histoR_LY->Write(TString::Format("X_%.1f", x)); // store histograms
   }
 
   TF2 *norm = new TF2("norm", "y/[0]");
@@ -153,6 +156,13 @@ void LY_extract(std::string path_and_prefix)
     Y1 = norm->Eval(-1, Y1);
   }
 
+  ofstream datafile("rLY_Type1_PandaRoot.csv", std::ios::out);
+  datafile << "// PandaRoot v13.0.0 Muon p=80MeV" << std::endl;
+  for (const auto &[x, y, ex, ey] : points)
+  {
+    datafile << x << "," << y << "," << ex << "," << ey << std::endl;
+  }
+
   // Disclaimer/Warning
   // I did never and probably will never understand how to properly draw a graph/histo/multigraph and write it to disk in CERN ROOT
   // I sincerely apologize about what follows...
@@ -165,14 +175,16 @@ void LY_extract(std::string path_and_prefix)
   // REF
   datawriter->cd();
 
-  TGraphErrors *REF1 = new TGraphErrors("Bremer_rLY_Type1_sim.csv", "%lg, %lg, %lg, %lg");
-  TGraphErrors *REF2 = new TGraphErrors("Bremer_rLY_Type1_exp.csv", "%lg, %lg, %lg, %lg");
-  TGraph *REF3 = new TGraph("p5Sim1.csv", "%lg,%*lg,%*lg,%*lg,%*lg,%*lg,%lg");
-  TGraph *REF4 = new TGraph("p5Sim3.csv", "%lg,%*lg,%*lg,%*lg,%*lg,%*lg,%lg");
+  TGraphErrors *REF1 = new TGraphErrors("rLY_Type1_Bremer_sim.csv", "%lg, %lg, %lg, %lg");
+  TGraphErrors *REF2 = new TGraphErrors("rLY_Type1_Bremer_exp.csv", "%lg, %lg, %lg, %lg");
+  TGraph *REF3 = new TGraph("rLY_Type1_p5js_naked_clear.csv", "%lg,%*lg,%*lg,%*lg,%*lg,%*lg,%lg");
+  TGraph *REF5 = new TGraph("rLY_Type1_p5js_wrap_absorb.csv", "%lg,%*lg,%*lg,%*lg,%*lg,%*lg,%lg");
+  TGraph *REF4 = new TGraph("rLY_Type1_Marteinsottir_exp.csv", "%lg,%*lg,%lg");
   REF1->SetTitle("Bremer, Simulation");
   REF2->SetTitle("Bremer, Experiment (Precision Setup)");
   REF3->SetTitle("p5.js, no absorption, no wrapping");
   REF4->SetTitle("p5.js, absorption, wrapping");
+  REF4->SetTitle("Marteinsottir, Experiment");
   REF1->Fit("pol2", "WQ", "", 0, 20);
   REF2->Fit("pol2", "WQ", "", 0, 20);
   REF3->Fit("pol2", "WQ", "", 0.9, 20);
