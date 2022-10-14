@@ -1,0 +1,9 @@
+{
+  "files.associations": {
+    "LY_sim.C": "cpp",
+    "LY_digi.C": "cpp",
+    "LY_ana.C": "cpp",
+    "LY_extract.C": "cpp",
+    "eventDisplay.C": "cpp"
+  }
+}

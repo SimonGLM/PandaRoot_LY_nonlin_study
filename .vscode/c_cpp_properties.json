@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "ROOT_v13.0.0",
+            "includePath": [
+                "/home/simon/fairsoft_apr22/FairSoft/source",
+                "/home/simon/fairsoft_apr22/FairRoot/source",
+                "/home/simon/fairsoft_apr22/PandaRoot/source",
+                "${workspaceFolder}/**"
+            ],
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++17",
+            "dotConfig": "/home/simon/fairsoft_apr22/PandaRoot/build/config.sh",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}
