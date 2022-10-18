@@ -122,7 +122,7 @@ int eventDisplay(TString prefix = "dummy")
   fMan->Init();
 
   TEveViewer *viewer = (TEveViewer *)(gEve->GetViewers()->FindChild("Viewer 1"));
-  viewer->GetGLViewer()->CurrentCamera().SetCenterVec(55.952, 3.2, 3, 8);
+  viewer->GetGLViewer()->CurrentCamera().SetCenterVec(55.952, 3.2, 3.8);
   viewer->GetGLViewer()->CurrentCamera().SetExternalCenter(kTRUE);
   viewer->GetGLViewer()->SetDrawCameraCenter(kTRUE);
 
